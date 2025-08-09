@@ -1,0 +1,8 @@
+*.json
+*.class
+*.lst
+*.txt
+*.xml
+target/test-classes/config.properties
+target/test-classes/features/api.feature
+target/test-classes/features/home.feature
