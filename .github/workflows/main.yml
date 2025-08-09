@@ -33,8 +33,21 @@ jobs:
           chmod +x geckodriver
           sudo mv geckodriver /usr/local/bin/
 
-      - name: Build and run tests with Allure
-        run: mvn clean test
+      - name: Build and run tests with Allure (debug mode)
+        run: mvn clean test -e -X
+
+      - name: Show Surefire Test Reports on Failure
+        if: failure()
+        run: |
+          echo "===== TEST REPORTS ====="
+          cat target/surefire-reports/*.txt || true
+
+      - name: Upload Surefire Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports
 
       - name: Install Allure Commandline
         run: |
