@@ -1,4 +1,4 @@
-name: Run Tests and Generate Allure Report
+name: Run Tests and Generate Cucumber Report
 
 on:
   push:
@@ -20,21 +20,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Firefox
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox
-
-      - name: Install geckodriver
-        run: |
-          GECKODRIVER_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-          wget https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz
-          tar -xzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz
-          chmod +x geckodriver
-          sudo mv geckodriver /usr/local/bin/
-
-      - name: Build and run tests with Allure (debug mode)
-        run: mvn clean test -e -X
+      # Run only API (non-UI) tests
+      - name: Run Cucumber tests
+        run: mvn clean test -Dcucumber.filter.tags="@api" -e -X
+        # If using Maven profiles:
+        # run: mvn clean test -Papi-tests
 
       - name: Show Surefire Test Reports on Failure
         if: failure()
@@ -49,18 +39,9 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports
 
-      - name: Install Allure Commandline
-        run: |
-          wget https://github.com/allure-framework/allure2/releases/download/2.25.0/allure-2.25.0.tgz
-          tar -xzf allure-2.25.0.tgz
-          sudo mv allure-2.25.0 /opt/allure
-          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
-
-      - name: Generate Allure Report
-        run: allure generate target/allure-results --clean -o target/allure-report
-
-      - name: Upload Allure Report
+      - name: Upload Cucumber HTML Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report
-          path: target/allure-report
+          name: cucumber-html-report
+          path: target/cucumber-reports
