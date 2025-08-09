@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  selenium:
+    image: selenium/standalone-chrome:latest
+    shm_size: '2g'
+    ports:
+      - '4444:4444'
+  zap:
+    image: owasp/zap2docker-stable:latest
+    command: sleep infinity
+    ports:
+      - '8080:8080'
